@@ -257,46 +257,12 @@ function animateIdle () {
         .........7777.......7777........
         `)
 }
-function setPlayer () {
-    player = sprites.create(img`
-        ................................
-        ................................
-        ................................
-        ................................
-        ................................
-        ................................
-        ................................
-        .............ddddddd............
-        ............ddddddddd...........
-        ...........d7ddddddd7d..........
-        ...........dd7ddddd7dd..........
-        ...........ddd7ddd7ddd..........
-        ...........ddd44444ddd..........
-        ...........dd44ff444dd..........
-        .........1.dd4ff1f44dd.1........
-        .........11dd4feef44dd11........
-        ........f111dd4ff44dd111f.......
-        .......ff1117ddddddd7111ff......
-        .......fffffdfff1fffdfffff......
-        ........dd.dddff1ffddd.dd.......
-        ........ff.ddddf1fdddd.ff.......
-        ........ff.dfdfdddfdfd.ff.......
-        .......fff.dffdddddffd.77.......
-        ......ffdfddffd777dffdd77.......
-        .......fffddfd77777dfddf........
-        ..........dddd77777dddd.f.f.....
-        ..........dddf77777fddd..f......
-        ..........ddddddddddddd.........
-        ..........fff.......fff.........
-        .........7777.......7777........
-        ........77777.......77777.......
-        .........7777.......7777........
-        `, SpriteKind.Player)
-    scene.cameraFollowSprite(player)
-    controller.moveSprite(player, 100, 100)
-    player.setFlag(SpriteFlag.StayInScreen, true)
-    player.ay = gravity
-    player.z = 5
+function setPlayer (player2: Sprite) {
+    scene.cameraFollowSprite(player2)
+    controller.moveSprite(player2, 100, 100)
+    player2.setFlag(SpriteFlag.StayInScreen, true)
+    player2.ay = gravity
+    player2.z = 5
 }
 function spawnCoral () {
     for (let value1 of tiles.getTilesByType(sprites.builtin.coral5)) {
@@ -1095,6 +1061,9 @@ function animateRun () {
         ..............7777777f777.......
         ...............7777777f777......
         `)
+        leftPlayer1.destroy()
+        leftPlayer2.destroy()
+        leftPlayer3.destroy()
 }
 function animateJump () {
     // Because there isn't currently an easy way to say "play this animation a single time
@@ -1214,6 +1183,7 @@ function animateJump () {
             .......222.....7777777..........
             `)
     }
+    leftPlayer1.destroy()
 }
 function initializeCoralAnimation () {
     coralAnimation = animation.createAnimation(ActionKind.Idle, 600)
@@ -1334,9 +1304,9 @@ function toContinue () {
     }
 }
 function initializePlayerAnimations () {
-    animateRun()
     animateIdle()
     animateJump()
+    animateRun()
 }
 function clearGame () {
     score = 0
@@ -1383,30 +1353,66 @@ function hasNextLevel () {
 function spawnGoals () {
     for (let value4 of tiles.getTilesByType(myTiles.tile4)) {
         coin = sprites.create(img`
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . f f f f . . . . . .
-            . . . . f f 5 5 5 5 f f . . . .
-            . . . . f 5 5 5 5 5 5 f . . . .
-            . . . f 5 5 5 4 4 5 5 5 f . . .
-            . . . f 5 5 5 4 4 5 5 5 f . . .
-            . . . f 5 5 5 4 4 5 5 5 f . . .
-            . . . f 5 5 5 4 4 5 5 5 f . . .
-            . . . . f 5 5 5 5 5 5 f . . . .
-            . . . . f f 5 5 5 5 f f . . . .
-            . . . . . . f f f f . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-        `, SpriteKind.Coin)
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . f f f f . . . . . . 
+            . . . . f f 5 5 5 5 f f . . . . 
+            . . . . f 5 5 5 5 5 5 f . . . . 
+            . . . f 5 5 5 4 4 5 5 5 f . . . 
+            . . . f 5 5 5 4 4 5 5 5 f . . . 
+            . . . f 5 5 5 4 4 5 5 5 f . . . 
+            . . . f 5 5 5 4 4 5 5 5 f . . . 
+            . . . . f 5 5 5 5 5 5 f . . . . 
+            . . . . f f 5 5 5 5 f f . . . . 
+            . . . . . . f f f f . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, SpriteKind.Coin)
         tiles.placeOnTile(coin, value4)
         animation.attachAnimation(coin, coinAnimation)
         animation.setAction(coin, ActionKind.Idle)
         tiles.setTileAt(value4, myTiles.transparency16)
     }
 }
-let playerFacingLeft = false
+
+ game.onUpdate(function () {
+ if (player.vx < 0) {
+  playerFacingLeft = true
+  
+  } else if (player.vx > 0) {
+  
+  playerFacingLeft = false
+  
+  }
+  
+  if (player.vy != 0 || player.isHittingTile(CollisionDirection.Top)) {
+  
+  if (playerFacingLeft) {
+  
+  animation.setAction(player, ActionKind.JumpingLeft)
+  
+  } else {
+  
+  animation.setAction(player, ActionKind.JumpingRight)
+  
+  }
+  
+  } else if (player.vx < 0 && !(player.isHittingTile(CollisionDirection.Top))) {
+  
+  animation.setAction(player, ActionKind.RunningLeft)
+  
+  } else if (player.vx > 0 && !(player.isHittingTile(CollisionDirection.Top))) {
+  
+  animation.setAction(player, ActionKind.RunningRight)
+  
+  } else if (player.vy == 0 && player.isHittingTile(CollisionDirection.Bottom)) {
+  
+  animation.setAction(player, ActionKind.Idle)
+  
+ }
+ }) 
 let coin: Sprite = null
 let playerStartLocation: tiles.Location = null
 let pixelsToMeters = 0
@@ -1426,34 +1432,49 @@ let coral: Sprite = null
 let gravity = 0
 let mainIdle: animation.Animation = null
 let coinAnimation: animation.Animation = null
-let player: Sprite = null
 let levelScore = 0
 let score = 0
 let levelCount = 0
 let currentLevel = 0
+let player: Sprite = null
+let playerFacingLeft = false
+player = sprites.create(img`
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+    ................................
+    .............ddddddd............
+    ............ddddddddd...........
+    ...........d7ddddddd7d..........
+    ...........dd7ddddd7dd..........
+    ...........ddd7ddd7ddd..........
+    ...........ddd44444ddd..........
+    ...........dd44ff444dd..........
+    .........1.dd4ff1f44dd.1........
+    .........11dd4feef44dd11........
+    ........f111dd4ff44dd111f.......
+    .......ff1117ddddddd7111ff......
+    .......fffffdfff1fffdfffff......
+    ........dd.dddff1ffddd.dd.......
+    ........ff.ddddf1fdddd.ff.......
+    ........ff.dfdfdddfdfd.ff.......
+    .......fff.dffdddddffd.77.......
+    ......ffdfddffd777dffdd77.......
+    .......fffddfd77777dfddf........
+    ..........dddd77777dddd.f.f.....
+    ..........dddf77777fddd..f......
+    ..........ddddddddddddd.........
+    ..........fff.......fff.........
+    .........7777.......7777........
+    ........77777.......77777.......
+    .........7777.......7777........
+    `, SpriteKind.Player)
 setLevel()
-giveIntroduction()
 setGravity()
-setPlayer()
 initializeAnimations()
+setPlayer(player)
 setLevelTileMap(currentLevel)
-game.onUpdate(function () {
-    if (player.vx < 0) {
-        playerFacingLeft = true
-    } else if (player.vx > 0) {
-        playerFacingLeft = false
-    }
-    if (player.vy != 0 || player.isHittingTile(CollisionDirection.Top)) {
-        if (playerFacingLeft) {
-            animation.setAction(player, ActionKind.JumpingLeft)
-        } else {
-            animation.setAction(player, ActionKind.JumpingRight)
-        }
-    } else if (player.vx < 0 && !(player.isHittingTile(CollisionDirection.Top))) {
-        animation.setAction(player, ActionKind.RunningLeft)
-    } else if (player.vx > 0 && !(player.isHittingTile(CollisionDirection.Top))) {
-        animation.setAction(player, ActionKind.RunningRight)
-    } else if (player.vy == 0 && player.isHittingTile(CollisionDirection.Bottom)) {
-        animation.setAction(player, ActionKind.Idle)
-    }
-})
+giveIntroduction()
