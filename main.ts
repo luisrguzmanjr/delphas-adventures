@@ -1454,6 +1454,11 @@ game.onUpdate(function () {
         } else {
             animation.setAction(player, ActionKind.JumpingRight)
         }
+        if(currentLevel != 2) {
+            player.startEffect(effects.warmRadial, 50)
+        } else {
+            player.startEffect(effects.coolRadial, 100)
+        }
     } else if (player.vx < 0 && !(player.isHittingTile(CollisionDirection.Top))) {
         animation.setAction(player, ActionKind.RunningLeft)
     } else if (player.vx > 0 && !(player.isHittingTile(CollisionDirection.Top))) {
