@@ -174,22 +174,10 @@ function spawnCoral () {
     }
 }
 function playLoops () {
-    let mvol = 16
-    if (currentLevel != 2) {
-        guitar.loop(mvol)
-    } else {
-        bass.loop(mvol)
-    }
+    playingMusic = true
+    beat = 0
+    positions = [0, 0]
 }
-//hihat.loop(mvol*0.5) //50
-//snare.loop(mvol) //100
-//bass.loop(mvol*0.2) //80
-//guitar.loop(mvol) //100
-const hihat = new music.Melody("@0,50,0,0 ~5 c8-240 c8 c c c c c @0,250,0,0 c")
-const snare = new music.Melody("@10,75,0,0 ~5 r-240 r g5 r r r g r")
-const bass = new music.Melody("@10,120,80,0 ~15 c2-120 d# f f# g f# f d#")
-const guitar = new music.Melody("@100,100,160,0 ~15 c4-240 g r r c5 g r r c5 b4 g4 f# e d#-120 e-240")
-
 function setLevelTileMap (level: number) {
     clearGame()
     myTile = myTiles.transparency16
@@ -1559,12 +1547,12 @@ function spawnGoals () {
 scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.collectibleInsignia, function (sprite, location) {
     if (score == levelScore) {
         currentLevel += 1
+        playingMusic = false
+        music.stopAllSounds()
         if (hasNextLevel()) {
-            music.stopAllSounds()
             game.splash("Next level unlocked!")
             setLevelTileMap(currentLevel)
         } else {
-            music.stopAllSounds()
             giveEnding()
         }
     } else {
@@ -1598,6 +1586,63 @@ let score = 0
 let levelCount = 0
 let currentLevel = 0
 let mySprite = null
+let beat = 0
+let playingMusic = false
+const b1 = new music.Melody("@10,120,80,0 ~15 c2-120 d# f  f# g f# f  d#")
+const b4 = new music.Melody("@10,120,80,0 ~15 f2-120 g# a# b  c3 b2  a# g#")
+const b5 = new music.Melody("@10,120,80,0 ~15 g2-120 a# c3 c# d  c# a2# g")
+const g0 = new music.Melody("@100,100,160,0 ~15 r-120 r r r r r r r")
+const g1a = new music.Melody("@100,100,160,0 ~15 c4-240 g r r c5 g r r c5 b4 g4 f# e d#-120 e-240")
+const g1b = new music.Melody("@100,100,160,0 ~15 c4-240 r f# g r g r r f# f r d# r c-120")
+const g4 = new music.Melody("@100,100,160,0 ~15 f4-120 r f a# b a# f5-60")
+const g5 = new music.Melody("@100,100,160,0 ~15 r-120 g4 r g d5 c# d g")
+let positions = [0, 0]
+let lengths = [2, 2]
+let vol = 32
+let volumes = [vol-(vol*0.5), vol,vol-(vol*0.2), vol-(vol*0.1)]
+let tracks = [[
+b1,
+b1,
+b1,
+b1,
+b4,
+b4,
+b1,
+b1,
+b5,
+b4,
+b1,
+b1
+], [
+g0,
+g1a,
+g1b,
+g1a,
+g4,
+g4,
+g1a,
+g1b,
+g5,
+g4,
+g1a,
+g1b
+]]
+game.onUpdateInterval(1000 * 60 / 240 * 8, function () {
+    if (!(playingMusic)) {
+        music.stopAllSounds()
+        return
+    }
+    for (let track = 0; track <= 3; track++) {
+        if (beat % lengths[track] == 0) {
+            tracks[track][positions[track]].play(volumes[track])
+            ++positions[track]
+if (positions[track] >= tracks[track].length) {
+                positions[track] = 0
+            }
+        }
+    }
+    beat += 1
+})
 scene.setBackgroundImage(img`
     fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
     fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
