@@ -20,6 +20,11 @@ scene.onOverlapTile(SpriteKind.Player, myTiles.tile2, function (sprite, location
     score += 2
     music.baDing.play(255)
 })
+function playLoops () {
+    playingMusic = true
+    beat = 0
+    positions = [0, 0]
+}
 function initializeAnimations () {
     initializePlayerAnimations()
     initializeBoardAnimation()
@@ -172,11 +177,6 @@ function spawnCoral () {
         animation.setAction(coral, ActionKind.Idle)
         tiles.setTileAt(value1, myTiles.transparency16)
     }
-}
-function playLoops () {
-    playingMusic = true
-    beat = 0
-    positions = [0, 0]
 }
 function setLevelTileMap (level: number) {
     clearGame()
@@ -819,7 +819,6 @@ function animateRun () {
     mainRunLeft.addAnimationFrame(playerRight2)
     mainRunLeft.addAnimationFrame(playerRight1)
     mainRunLeft.addAnimationFrame(playerRight3)
-
     mainRunRight = animation.createAnimation(ActionKind.RunningRight, 100)
     animation.attachAnimation(player, mainRunRight)
     mainRunRight.addAnimationFrame(img`
@@ -997,7 +996,7 @@ function animateJump () {
         ........2442...77777............
         .......2442...7777777...........
         .......222.....7777777...c......
-    `
+        `
     leftPlayer1 = sprites.create(playerRight1, 0)
     playerRight1.flipX()
     animation.attachAnimation(player, mainJumpLeft)
@@ -1037,7 +1036,7 @@ function animateJump () {
         ........2442...77777............
         .......2442...7777777...........
         .......222.....7777777...c......
-    `)
+        `)
     leftPlayer1.destroy()
 }
 function initializeCoralAnimation () {
@@ -1356,12 +1355,12 @@ function clearGame () {
 info.onCountdownEnd(function () {
     toContinue()
 })
-info.onLifeZero(function () {
-    toContinue()
-})
 function showDialog (text: string) {
     game.showLongText(text, DialogLayout.Bottom)
 }
+info.onLifeZero(function () {
+    toContinue()
+})
 function setGravity () {
     pixelsToMeters = 30
     gravity = 9.81 * pixelsToMeters
@@ -1373,7 +1372,7 @@ function initializeLevel (level: number, levelTitle: string) {
     tiles.setTileAt(playerStartLocation, myTile)
     spawnGoals()
     spawnCoral()
-    playLoops ()
+    playLoops()
 }
 function initializeBoardAnimation () {
     boardAnimation = animation.createAnimation(ActionKind.Idle, 200)
@@ -1582,12 +1581,13 @@ let coral: Sprite = null
 let gravity = 0
 let player: Sprite = null
 let mainIdle: animation.Animation = null
+let beat = 0
+let playingMusic = false
 let score = 0
 let levelCount = 0
 let currentLevel = 0
+let positions: number[] = []
 let mySprite = null
-let beat = 0
-let playingMusic = false
 const b1 = new music.Melody("@10,120,80,0 ~15 c2-120 d# f  f# g f# f  d#")
 const b4 = new music.Melody("@10,120,80,0 ~15 f2-120 g# a# b  c3 b2  a# g#")
 const b5 = new music.Melody("@10,120,80,0 ~15 g2-120 a# c3 c# d  c# a2# g")
@@ -1596,10 +1596,10 @@ const g1a = new music.Melody("@100,100,160,0 ~15 c4-240 g r r c5 g r r c5 b4 g4 
 const g1b = new music.Melody("@100,100,160,0 ~15 c4-240 r f# g r g r r f# f r d# r c-120")
 const g4 = new music.Melody("@100,100,160,0 ~15 f4-120 r f a# b a# f5-60")
 const g5 = new music.Melody("@100,100,160,0 ~15 r-120 g4 r g d5 c# d g")
-let positions = [0, 0]
+positions = [0, 0]
 let lengths = [2, 2]
 let vol = 32
-let volumes = [vol-(vol*0.5), vol,vol-(vol*0.2), vol-(vol*0.1)]
+let volumes = [vol - vol * 0.5, vol, vol - vol * 0.2, vol - vol * 0.1]
 let tracks = [[
 b1,
 b1,
@@ -1627,22 +1627,6 @@ g4,
 g1a,
 g1b
 ]]
-game.onUpdateInterval(1000 * 60 / 240 * 8, function () {
-    if (!(playingMusic)) {
-        music.stopAllSounds()
-        return
-    }
-    for (let track = 0; track <= 3; track++) {
-        if (beat % lengths[track] == 0) {
-            tracks[track][positions[track]].play(volumes[track])
-            ++positions[track]
-if (positions[track] >= tracks[track].length) {
-                positions[track] = 0
-            }
-        }
-    }
-    beat += 1
-})
 scene.setBackgroundImage(img`
     fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
     fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -1821,18 +1805,18 @@ game.onUpdate(function () {
     } else if (player.vx > 0) {
         playerFacingLeft = false
     }
+    // remove due to lower fps on hardware since sprite count is increased
+    // if (currentLevel != 2) {
+    // player.startEffect(effects.warmRadial, 50)
+    // } else {
+    // player.startEffect(effects.coolRadial, 50)
+    // }
     if (player.vy != 0 || player.isHittingTile(CollisionDirection.Top)) {
         if (playerFacingLeft) {
             animation.setAction(player, ActionKind.JumpingLeft)
         } else {
             animation.setAction(player, ActionKind.JumpingRight)
         }
-        //remove due to lower fps on hardware since sprite count is increased
-        //if (currentLevel != 2) {
-            //player.startEffect(effects.warmRadial, 50)
-        //} else {
-            //player.startEffect(effects.coolRadial, 50)
-        //}
     } else if (player.vx < 0 && !(player.isHittingTile(CollisionDirection.Top))) {
         animation.setAction(player, ActionKind.RunningLeft)
     } else if (player.vx > 0 && !(player.isHittingTile(CollisionDirection.Top))) {
@@ -1855,4 +1839,20 @@ forever(function () {
             controller.moveSprite(player, 75, 75)
         }
     }
+})
+game.onUpdateInterval(1000 * 60 / 240 * 8, function () {
+    if (!(playingMusic)) {
+        music.stopAllSounds()
+        return
+    }
+    for (let track = 0; track <= 3; track++) {
+        if (beat % lengths[track] == 0) {
+            tracks[track][positions[track]].play(volumes[track])
+++positions[track]
+if (positions[track] >= tracks[track].length) {
+                positions[track] = 0
+            }
+        }
+    }
+    beat += 1
 })
