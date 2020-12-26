@@ -3,9 +3,7 @@ enum ActionKind {
     RunningRight,
     Idle,
     JumpingLeft,
-    JumpingRight,
-    Walking,
-    Jumping
+    JumpingRight
 }
 namespace SpriteKind {
     export const Board = SpriteKind.create()
@@ -808,9 +806,6 @@ function animateRun () {
         ...........7777777f777777.......
         ............7777777f777777......
         `
-    leftPlayer1 = sprites.create(playerRight1, 0)
-    leftPlayer2 = sprites.create(playerRight2, 0)
-    leftPlayer3 = sprites.create(playerRight3, 0)
     playerRight1.flipX()
     playerRight2.flipX()
     playerRight3.flipX()
@@ -957,9 +952,6 @@ function animateRun () {
         ...........7777777f777777.......
         ............7777777f777777......
         `)
-    leftPlayer1.destroy()
-    leftPlayer2.destroy()
-    leftPlayer3.destroy()
 }
 function animateJump () {
     mainJumpLeft = animation.createAnimation(ActionKind.JumpingLeft, 100)
@@ -997,7 +989,6 @@ function animateJump () {
         .......2442...7777777...........
         .......222.....7777777...c......
         `
-    leftPlayer1 = sprites.create(playerRight1, 0)
     playerRight1.flipX()
     animation.attachAnimation(player, mainJumpLeft)
     mainJumpLeft.addAnimationFrame(playerRight1)
@@ -1037,7 +1028,6 @@ function animateJump () {
         .......2442...7777777...........
         .......222.....7777777...c......
         `)
-    leftPlayer1.destroy()
 }
 function initializeCoralAnimation () {
     coralAnimation = animation.createAnimation(ActionKind.Idle, 600)
@@ -1165,7 +1155,7 @@ function initializePlayerAnimations () {
 }
 function giveEnding () {
     info.showCountdown(false)
-clearGame()
+    clearGame()
     player.destroy()
     tiles.setTilemap(tilemap`level_3`)
     scene.setBackgroundImage(img`
@@ -1338,7 +1328,7 @@ clearGame()
         `)
     showDialog("Congratulations! You've fully repaired your Mechbot!")
     showDialog("You are Ready2Robot Pilot!")
-    pause(3000)
+    pause(2000)
     game.reset()
 }
 function clearGame () {
@@ -1565,9 +1555,6 @@ let playerStartLocation: tiles.Location = null
 let mainJumpRight: animation.Animation = null
 let mainJumpLeft: animation.Animation = null
 let mainRunRight: animation.Animation = null
-let leftPlayer3: Sprite = null
-let leftPlayer2: Sprite = null
-let leftPlayer1: Sprite = null
 let playerRight3: Image = null
 let playerRight2: Image = null
 let playerRight1: Image = null
@@ -1587,7 +1574,6 @@ let score = 0
 let levelCount = 0
 let currentLevel = 0
 let positions: number[] = []
-let mySprite = null
 const b1 = new music.Melody("@10,120,80,0 ~15 c2-120 d# f  f# g f# f  d#")
 const b4 = new music.Melody("@10,120,80,0 ~15 f2-120 g# a# b  c3 b2  a# g#")
 const b5 = new music.Melody("@10,120,80,0 ~15 g2-120 a# c3 c# d  c# a2# g")
@@ -1805,12 +1791,6 @@ game.onUpdate(function () {
     } else if (player.vx > 0) {
         playerFacingLeft = false
     }
-    // remove due to lower fps on hardware since sprite count is increased
-    // if (currentLevel != 2) {
-    // player.startEffect(effects.warmRadial, 50)
-    // } else {
-    // player.startEffect(effects.coolRadial, 50)
-    // }
     if (player.vy != 0 || player.isHittingTile(CollisionDirection.Top)) {
         if (playerFacingLeft) {
             animation.setAction(player, ActionKind.JumpingLeft)
@@ -1848,8 +1828,8 @@ game.onUpdateInterval(1000 * 60 / 240 * 8, function () {
     for (let track = 0; track <= 3; track++) {
         if (beat % lengths[track] == 0) {
             tracks[track][positions[track]].play(volumes[track])
-++positions[track]
-if (positions[track] >= tracks[track].length) {
+            ++positions[track]
+            if (positions[track] >= tracks[track].length) {
                 positions[track] = 0
             }
         }
