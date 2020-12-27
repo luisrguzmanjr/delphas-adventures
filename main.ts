@@ -1884,19 +1884,19 @@ let levelScore = 0
 let myTile: Image = null
 let coral: Sprite = null
 let gravity = 0
+let player: Sprite = null
 let playerRight1: Image = null
 let beat = 0
 let playingMusic = false
 let score = 0
 let levelCount = 0
-let player: Sprite = null
 let currentLevel = 0
-let positions: number[] = []
-let mainIdle = null
-let mainRunLeft = null
-let mainRunRight = null
-let mainJumpLeft = null
 let mainJumpRight = null
+let mainJumpLeft = null
+let mainRunRight = null
+let mainRunLeft = null
+let mainIdle = null
+let positions: number[] = []
 const b1 = new music.Melody("@10,120,80,0 ~15 c2-120 d# f  f# g f# f  d#")
 const b4 = new music.Melody("@10,120,80,0 ~15 f2-120 g# a# b  c3 b2  a# g#")
 const b5 = new music.Melody("@10,120,80,0 ~15 g2-120 a# c3 c# d  c# a2# g")
@@ -2107,7 +2107,6 @@ setGravity()
 setPlayer()
 setLevelTileMap(currentLevel)
 giveIntroduction()
-controller.moveSprite(player)
 // initializePlayerAnimations()
 game.onUpdate(function () {
     if (player.vx < 0) {
